@@ -36,7 +36,8 @@ public class KeyServer implements KeyServerInterface {
     }
 
     public PublicKey getKey(String userId) throws RemoteException {
-        return keys.get(userId);
+        PublicKey key = keys.get("Test");
+        return key;
     }
 
     public static void main(String args[]) {

@@ -71,6 +71,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         } catch (NoSuchAlgorithmException e) {
             System.err.println("NoSuchAlgorithmException.");
         } catch (InvalidKeyException e) {
+            System.out.println("TEST");
             System.err.println("InvalidKeyException.");
         } catch (SignatureException e) {
             System.err.println("SignatureException.");

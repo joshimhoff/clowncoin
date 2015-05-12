@@ -12,6 +12,7 @@ public class Account {
 
     // Toy account for test purposes
     Account() {
+        setID("Test");
         setFirstName("Johnny");
         setLastName("Appleseed");
         setBalance(10.0);
