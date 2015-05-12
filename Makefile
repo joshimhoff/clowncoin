@@ -1,12 +1,12 @@
 reg:
 	javac *.java
-	rmic KeyServer
+	rmic MarketPlace
 	rmic PaymentEngine
 	rmiregistry
 
-key: KeyServer.java KeyServerInterface.java
+market: Marketplace.java MarketplaceInterface.java
 	javac *.java
-	java -Djava.security.policy=ClownCoin.policy KeyServer
+	java -Djava.security.policy=ClownCoin.policy Marketplace
 
 client: Client.java PaymentEngine.java PaymentEngineInterface.java
 	javac *.java

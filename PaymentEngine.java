@@ -5,26 +5,48 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import javax.crypto.*;
+import java.net.InetAddress
 
 // Payment Class
 public class PaymentEngine implements PaymentEngineInterface {
     private Account account;
-    private KeyServerInterface keyServer;
+    private MarketplaceInterface marketplace;
 
-    public PaymentEngine() {
+    public PaymentEngine(String marketplaceIP) {
+        // In the future, this would load a persistent account from memory or web
         account = new Account();
 
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
         try {
-            Registry registry = LocateRegistry.getRegistry("127.0.0.1");
-            keyServer = (KeyServerInterface) registry.lookup("KeyServer");
-            keyServer.setKey(account.getID(), account.getPublicKey());
-        } catch (RemoteException e) {
-            System.err.println("RemoteException.");
-        } catch (NotBoundException e) {
-            System.err.println("NotBoundException.");
+            Registry registry = LocateRegistry.getRegistry(marketplaceIP);
+            marketplace = (MarketplaceInterface) registry.lookup("Marketplace");
+
+            if (account.getID() == null) {
+                // New User. Get and set an account ID. Also register the new 
+                account.setID(marketplace.register(InetAddress.getAddress(), account.getPublicKey()));
+            }
+        }
+
+        bindToRegistry();
+    }
+
+    public void bindToRegistry() {
+        if (System.getSecurityManager() == null)
+            System.setSecurityManager(new SecurityManager());
+
+        try {
+            PaymentEngineInterface stub = (PaymentEngineInterface) UnicastRemoteObject.exportObject(this, 0);
+
+            // Find and bind to registry
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind("PaymentEngine", stub);
+
+            System.out.println("PaymentEngine bound.");
+        } catch (Exception e) {
+            System.err.println("Exception during PaymentEngine binding:");
+            e.printStackTrace();
         }
     }
 
@@ -34,7 +56,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         try {
             Signature dsa = Signature.getInstance("SHA1withDSA");
             dsa.initSign(account.getPrivateKey());
-            transaction = new Transaction(amount, account.getLastName(), payeeIP);
+            transaction = new Transaction(amount, account.getID(), payeeIP);
             dsa.update(transaction.toBytes());
             signature = dsa.sign();
         } catch (NoSuchAlgorithmException e) {
@@ -52,7 +74,8 @@ public class PaymentEngine implements PaymentEngineInterface {
             Registry registry = LocateRegistry.getRegistry(payeeIP);
             PaymentEngineInterface engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
             engine.receivePayment(transaction, signature);
-            account.decrementBalance(amount);
+            System.out.printf("Payment of %f CC sent at %s to %s.\n",
+                  t.getAmount(), t.getDateString(), t.getPayee());
         } catch (RemoteException e) {
             System.err.println("RemoteException.");
         } catch (NotBoundException e) {
@@ -65,7 +88,7 @@ public class PaymentEngine implements PaymentEngineInterface {
 
         try {
             Signature dsa = Signature.getInstance("SHA1withDSA");
-            dsa.initVerify(keyServer.getKey(t.getPayer()));
+            dsa.initVerify(marketplace.getKey(t.getPayer()));
             dsa.update(t.toBytes());
             verifies = dsa.verify(signature);
         } catch (NoSuchAlgorithmException e) {
@@ -78,7 +101,6 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
 
         if (verifies) {
-            account.incrementBalance(t.getAmount());
             System.out.printf("Payment of %f CC reciever at %s from %s.\n",
                               t.getAmount(), t.getDateString(), t.getPayer());
             return 1;
@@ -87,26 +109,8 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public double checkBalance() {
-        return account.getBalance();
+       //TODO: get balance from clown block
+        return 0.0;
     }
 
-    // TODO not correct
-    public static void bindToRegistry() {
-        if (System.getSecurityManager() == null)
-            System.setSecurityManager(new SecurityManager());
-
-        try {
-            PaymentEngine engine = new PaymentEngine();
-            PaymentEngineInterface stub = (PaymentEngineInterface) UnicastRemoteObject.exportObject(engine, 0);
-
-            // Find and bind to registry
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("PaymentEngine", stub);
-
-            System.out.println("PaymentEngine bound.");
-        } catch (Exception e) {
-            System.err.println("Exception during PaymentEngine binding:");
-            e.printStackTrace();
-        }
-    }
 }

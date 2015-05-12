@@ -7,12 +7,14 @@ import javax.crypto.*;
 import java.util.Map;
 import java.util.HashMap;
 
-// Payment Class
-public class KeyServer implements KeyServerInterface {
-    Map<String, PublicKey> keys;
+// MarketPlace Class
+public class Marketplace implements MarketplaceInterface {
+    Map<String, PublicKey> keys;        // UserIDs to public keys
+    Map<String, String> ips;            // UserIDs tp IP addresses
 
-    public KeyServer() {
+    public PaymentEngine() {
         keys = new HashMap<String, PublicKey>(); 
+        ips = new HashMap<String, String>();
 
         if (System.getSecurityManager() == null)
             System.setSecurityManager(new SecurityManager());
@@ -28,19 +30,28 @@ public class KeyServer implements KeyServerInterface {
         }
     }
 
-    public void setKey(String userId, PublicKey key) throws RemoteException {
-        PublicKey alreadySet = keys.get(userId);
-        if (alreadySet == null) {
-            keys.put(userId, key); 
-        }
+    String register(String ip, PublicKey key) throws RemoteException {
+        // Generate userID
+        String newID = keys.size().toString();
+
+        // Add public key and IP to maps        
+        keys.put(newID, key);
+        ips.put(newID, ip);
+
+        // Return UserID
+        return newID;
     }
 
-    public PublicKey getKey(String userId) throws RemoteException {
-        PublicKey key = keys.get("Test");
-        return key;
+    Vector<String> getNodes() throws RemoteException {
+        Vector<String> nodes = new Vector<String>(ips.keySet().toArray());
+        return nodes;
+    }    
+
+    PublicKey getKey(String userId) throws RemoteException {
+        return keys.get(userId);
     }
 
     public static void main(String args[]) {
-        KeyServer keyServer = new KeyServer();
+        Marketplace marketplace = new Marketplace();
     }
 }

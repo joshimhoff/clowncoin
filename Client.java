@@ -14,9 +14,13 @@ public class Client {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("");
         
+        System.out.println("Registering new user...");
+        
         PaymentEngine pe = new PaymentEngine();
         // TODO not correct
         pe.bindToRegistry();
+
+        System.out.println("Registered!");
 
         while (true) {
             Console console = System.console();
