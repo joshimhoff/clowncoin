@@ -1,4 +1,6 @@
 import java.io.*;
+import java.security.*;
+import javax.crypto.*;
 
 // Account Class
 public class Account {
@@ -14,10 +16,16 @@ public class Account {
         setLastName("Appleseed");
         setBalance(10.0);
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
-        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-        keyGen.initialize(1024, random);
-        keys = keyGen.generateKeyPair();
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            keyGen.initialize(1024, random);
+            keys = keyGen.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("NoSuchAlgorithmException.");
+        } catch (NoSuchProviderException e) {
+            System.err.println("NoSuchProviderException.");
+        }
     }
 
     public void setID(String id) { this.accountId = id; }

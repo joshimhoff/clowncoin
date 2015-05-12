@@ -48,8 +48,6 @@ public class Client {
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Command not parsed correctly.");
-            } catch (RemoteException e) {
-                System.out.println("RMI failed.");
             }
         }
     }

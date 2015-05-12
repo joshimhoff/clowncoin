@@ -1,7 +1,10 @@
 import java.rmi.RemoteException;
+import java.rmi.NotBoundException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.*;
+import javax.crypto.*;
 
 // Payment Class
 public class PaymentEngine implements PaymentEngineInterface {
@@ -15,31 +18,45 @@ public class PaymentEngine implements PaymentEngineInterface {
             System.setSecurityManager(new SecurityManager());
         }
         try {
-            Registry registry = LocateRegistry.getRegistry(TODO);
+            Registry registry = LocateRegistry.getRegistry("127.0.0.1");
             keyServer = (KeyServerInterface) registry.lookup("KeyServer");
             keyServer.setKey(account.getID(), account.getPublicKey());
         } catch (RemoteException e) {
-            System.err.println("Remote exception.");
+            System.err.println("RemoteException.");
+        } catch (NotBoundException e) {
+            System.err.println("NotBoundException.");
         }
     }
 
     public void makePayment(String payeeIP, double amount) {
-        Signature dsa = Signature.getInstance("SHA1withDSA");
-        dsa.initSign(account.getPrivateKey());
-        Transaction transaction = new Transaction(amount, account.getLastName(), payeeIP);
-        dsa.update(transaction.toBytes());
-        byte[] signature = dsa.sign();
+        Transaction transaction = null;
+        byte[] signature = null;
+        try {
+            Signature dsa = Signature.getInstance("SHA1withDSA");
+            dsa.initSign(account.getPrivateKey());
+            transaction = new Transaction(amount, account.getLastName(), payeeIP);
+            dsa.update(transaction.toBytes());
+            signature = dsa.sign();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("NoSuchAlgorithmException.");
+        } catch (InvalidKeyException e) {
+            System.err.println("InvalidKeyException.");
+        } catch (SignatureException e) {
+            System.err.println("SignatureException.");
+        }
         
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
         try {
             Registry registry = LocateRegistry.getRegistry(payeeIP);
-            engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
+            PaymentEngineInterface engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
             engine.receivePayment(transaction, signature);
             account.decrementBalance(amount);
         } catch (RemoteException e) {
-            System.err.println("Remote exception.");
+            System.err.println("RemoteException.");
+        } catch (NotBoundException e) {
+            System.err.println("NotBoundException.");
         }
     }
 
@@ -51,8 +68,12 @@ public class PaymentEngine implements PaymentEngineInterface {
             dsa.initVerify(keyServer.getKey(t.getPayer()));
             dsa.update(t.toBytes());
             verifies = dsa.verify(signature);
-        } catch (RemoteException e) {
-            System.err.println("Remote exception.");
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("NoSuchAlgorithmException.");
+        } catch (InvalidKeyException e) {
+            System.err.println("InvalidKeyException.");
+        } catch (SignatureException e) {
+            System.err.println("SignatureException.");
         }
 
         if (verifies) {

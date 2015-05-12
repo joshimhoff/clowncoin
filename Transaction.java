@@ -35,9 +35,16 @@ public class Transaction implements java.io.Serializable {
     }
 
     public byte[] toBytes() {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-    	ObjectOutputStream os = new ObjectOutputStream(out);
-    	os.writeObject(this);
+        ByteArrayOutputStream out = null;
+
+        try {
+            out = new ByteArrayOutputStream();
+            ObjectOutputStream os = new ObjectOutputStream(out);
+            os.writeObject(this);
+        } catch (IOException e) {
+            System.err.println("IOException.");
+        }
+
     	return out.toByteArray();
     }
 }
