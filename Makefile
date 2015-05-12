@@ -1,6 +1,6 @@
 reg:
 	javac *.java
-	rmic MarketPlace
+	rmic Marketplace
 	rmic PaymentEngine
 	rmiregistry
 
