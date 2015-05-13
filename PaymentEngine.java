@@ -5,7 +5,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import javax.crypto.*;
-import java.net.InetAddress
+import java.net.InetAddress;
 
 // Payment Class
 public class PaymentEngine implements PaymentEngineInterface {
@@ -25,11 +25,11 @@ public class PaymentEngine implements PaymentEngineInterface {
 
             if (account.getID() == null) {
                 // New User. Get and set an account ID. Also register the new 
-                account.setID(marketplace.register(InetAddress.getAddress(), account.getPublicKey()));
+                account.setID(marketplace.register(InetAddress.getLocalHost().getHostAddress(), account.getPublicKey()));
             }
-            bindToRegistry();
-        } catch (RemoteException e) {
-            System.err.println("Remote exception.");
+        } catch (Exception e) {
+            System.err.println("Exception during PaymentEngine binding:");
+            e.printStackTrace();
         }
 
     }
