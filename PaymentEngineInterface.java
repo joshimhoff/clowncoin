@@ -1,7 +1,11 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Vector;
+
 
 public interface PaymentEngineInterface extends Remote {
-    int verifyPayment(Transaction t, byte[] signature) throws RemoteException;
+    int verifyTransaction(Transaction t, byte[] signature) throws RemoteException;
     void receiveControlHood(Vector<Transaction> newControlHood) throws RemoteException;
+    void receivePaymentNotification(Transaction t) throws RemoteException;
+
 }

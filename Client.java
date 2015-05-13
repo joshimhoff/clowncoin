@@ -15,8 +15,8 @@ public class Client {
         System.out.println("");
         
         System.out.println("Registering new user...");
-        
-        PaymentEngine pe = new PaymentEngine(args[0]);
+
+        PaymentEngine pe = new PaymentEngine(args[1]);
 
         while (true) {
             Console console = System.console();

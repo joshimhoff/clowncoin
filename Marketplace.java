@@ -11,8 +11,8 @@ import java.util.Arrays;
 
 // MarketPlace Class
 public class Marketplace implements MarketplaceInterface {
-    Map<String, PublicKey> keys;        // UserIDs to public keys
-    Map<String, String> ips;            // UserIDs tp IP addresses
+    private Map<String, PublicKey> keys;        // UserIDs to public keys
+    private Map<String, String> ips;            // UserIDs tp IP addresses
 
     public Marketplace() {
         keys = new HashMap<String, PublicKey>(); 
@@ -55,6 +55,10 @@ public class Marketplace implements MarketplaceInterface {
 
     public PublicKey getKey(String userId) throws RemoteException {
         return keys.get(userId);
+    }
+
+    public String getIP(String userId) throws RemoteException {
+        return ips.get(userId);
     }
 
     public static void main(String args[]) {

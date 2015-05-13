@@ -6,15 +6,19 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import javax.crypto.*;
 import java.net.InetAddress;
+import java.util.Vector;
 
 // Payment Class
 public class PaymentEngine implements PaymentEngineInterface {
     private Account account;
+    private ControlHood controlHood;
     private MarketplaceInterface marketplace;
+
 
     public PaymentEngine(String marketplaceIP) {
         // In the future, this would load a persistent account from memory or web
         account = new Account();
+        controlHood = new ControlHood();
 
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
@@ -26,6 +30,9 @@ public class PaymentEngine implements PaymentEngineInterface {
             if (account.getID() == null) {
                 // New User. Get and set an account ID. Also register the new 
                 account.setID(marketplace.register(InetAddress.getLocalHost().getHostAddress(), account.getPublicKey()));
+                
+                // Recieve ten ClownCoin from the system as a Welcome Present
+
             }
         } catch (Exception e) {
             System.err.println("Exception during PaymentEngine binding:");
@@ -33,6 +40,13 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
 
     }
+
+    private void welcomePresent() {
+        Transaction t = new Transaction(10, "0", "127.0.0.1");
+        broadcastTransactionToBeVerified(t, null);
+
+    }
+
 
     public void bindToRegistry() {
         if (System.getSecurityManager() == null)
@@ -52,13 +66,13 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
     }
 
-    public void makePayment(String payeeIP, double amount) {
+    public void makePayment(String payeeID, double amount) {
         Transaction transaction = null;
         byte[] signature = null;
         try {
             Signature dsa = Signature.getInstance("SHA1withDSA");
             dsa.initSign(account.getPrivateKey());
-            transaction = new Transaction(amount, account.getID(), payeeIP);
+            transaction = new Transaction(amount, account.getID(), payeeID);
             dsa.update(transaction.toBytes());
             signature = dsa.sign();
         } catch (NoSuchAlgorithmException e) {
@@ -68,7 +82,11 @@ public class PaymentEngine implements PaymentEngineInterface {
         } catch (SignatureException e) {
             System.err.println("SignatureException.");
         }
+        broadcastTransactionToBeVerified(transaction, signature);
         
+    }
+
+    private void broadcastTransactionToBeVerified(Transaction transaction, byte[] signedTransaction) {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
@@ -79,7 +97,7 @@ public class PaymentEngine implements PaymentEngineInterface {
             for (String ip : marketplace.getNodes()) {
                 registry = LocateRegistry.getRegistry(ip);
                 engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
-                engine.verifyPayment(transaction, signature);
+                engine.verifyTransaction(transaction, signedTransaction);
             }
         } catch (RemoteException e) {
             System.err.println("RemoteException.");
@@ -88,14 +106,16 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
     }
 
-    public int receivePayment(Transaction t, byte[] signature) throws RemoteException {
+    public int verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
         boolean verifies = false;
 
         try {
-            Signature dsa = Signature.getInstance("SHA1withDSA");
-            dsa.initVerify(marketplace.getKey(t.getPayer()));
-            dsa.update(t.toBytes());
-            verifies = dsa.verify(signature);
+            if (t.getPayer() != "0") {
+                Signature dsa = Signature.getInstance("SHA1withDSA");
+                dsa.initVerify(marketplace.getKey(t.getPayer()));
+                dsa.update(t.toBytes());
+                verifies = dsa.verify(signedTransaction);
+            }
         } catch (NoSuchAlgorithmException e) {
             System.err.println("NoSuchAlgorithmException.");
         } catch (InvalidKeyException e) {
@@ -108,6 +128,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         if (verifies) {
             System.out.printf("Verified payment of %f CC at %s from %s to %s. Broadcasting updated hood.\n",
                               t.getAmount(), t.getDateString(), t.getPayer(), t.getPayee());
+            notifyPayerAndPayeeOfVerification(t);
             broadcastNewControlHood(t);
             return 1;
         }                       // TODO: Handle failed verification
@@ -119,6 +140,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         newControlHood.add(newTransaction);
         try {
             Registry registry;
+            PaymentEngineInterface engine;
             for (String ip : marketplace.getNodes()) {
                 registry = LocateRegistry.getRegistry(ip);
                 engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
@@ -126,6 +148,8 @@ public class PaymentEngine implements PaymentEngineInterface {
             }
         } catch (RemoteException e) {               // TODO: Handle failed broadcast
             System.err.println("Remote Exception.");        
+        } catch (NotBoundException e) {
+            System.err.println("NotBoundException.");
         }
     }
 
@@ -139,5 +163,38 @@ public class PaymentEngine implements PaymentEngineInterface {
         return controlHood.getBallance(account.getID());
     }
 
+    private void notifyPayerAndPayeeOfVerification(Transaction t) {
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
+        try {
+
+            // Notify the payer of the transaction, unless the payer is root
+            if (t.getPayer() != "0") {
+                Registry registry = LocateRegistry.getRegistry(marketplace.getIP(t.getPayer()));
+                PaymentEngineInterface engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
+                engine.receivePaymentNotification(t);
+            }
+
+            // Notify the payee of the transaction
+            Registry registry = LocateRegistry.getRegistry(marketplace.getIP(t.getPayee()));
+            PaymentEngineInterface engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
+            engine.receivePaymentNotification(t);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException.");
+        } catch (NotBoundException e) {
+            System.err.println("NotBoundException.");
+        }
+    }
+
+    public void receivePaymentNotification(Transaction t) throws RemoteException {
+        if (t.getPayer() == account.getID()) {
+            System.out.printf("Your payment of %f CC to %s has been verified.\n", t.getAmount(), t.getPayee());
+        } else if (t.getPayee() == account.getID()){
+            System.out.printf("You have received a verified payment of %f CC from %s.\n", t.getAmount(), t.getPayer());
+        } else {
+            //TODO Handle?
+        }
+    }
 
 }
