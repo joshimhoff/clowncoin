@@ -27,9 +27,11 @@ public class PaymentEngine implements PaymentEngineInterface {
                 // New User. Get and set an account ID. Also register the new 
                 account.setID(marketplace.register(InetAddress.getAddress(), account.getPublicKey()));
             }
+            bindToRegistry();
+        } catch (RemoteException e) {
+            System.err.println("Remote exception.");
         }
 
-        bindToRegistry();
     }
 
     public void bindToRegistry() {
@@ -71,11 +73,14 @@ public class PaymentEngine implements PaymentEngineInterface {
             System.setSecurityManager(new SecurityManager());
         }
         try {
-            Registry registry = LocateRegistry.getRegistry(payeeIP);
-            PaymentEngineInterface engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
-            engine.receivePayment(transaction, signature);
-            System.out.printf("Payment of %f CC sent at %s to %s.\n",
-                  t.getAmount(), t.getDateString(), t.getPayee());
+            // Ask network to verify payment
+            Registry registry;
+            PaymentEngineInterface engine;
+            for (String ip : marketplace.getNodes()) {
+                registry = LocateRegistry.getRegistry(ip);
+                engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
+                engine.verifyPayment(transaction, signature);
+            }
         } catch (RemoteException e) {
             System.err.println("RemoteException.");
         } catch (NotBoundException e) {
@@ -101,16 +106,38 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
 
         if (verifies) {
-            System.out.printf("Payment of %f CC reciever at %s from %s.\n",
-                              t.getAmount(), t.getDateString(), t.getPayer());
+            System.out.printf("Verified payment of %f CC at %s from %s to %s. Broadcasting updated hood.\n",
+                              t.getAmount(), t.getDateString(), t.getPayer(), t.getPayee());
+            broadcastNewControlHood(t);
             return 1;
-        }
+        }                       // TODO: Handle failed verification
         return 0;
     }
 
-    public double checkBalance() {
-       //TODO: get balance from clown block
-        return 0.0;
+    public void broadcastNewControlHood(Transaction newTransaction) {
+        Vector<Transaction> newControlHood = controlHood.getControlHood();
+        newControlHood.add(newTransaction);
+        try {
+            Registry registry;
+            for (String ip : marketplace.getNodes()) {
+                registry = LocateRegistry.getRegistry(ip);
+                engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
+                engine.receiveControlHood(newControlHood);
+            }
+        } catch (RemoteException e) {               // TODO: Handle failed broadcast
+            System.err.println("Remote Exception.");        
+        }
     }
+
+    public void receiveControlHood(Vector<Transaction> newControlHood) throws RemoteException {
+        if (newControlHood.size() > controlHood.size()) {
+            controlHood.setControlHood(newControlHood);
+        }
+    }
+
+    public double checkBalance() {
+        return controlHood.getBallance(account.getID());
+    }
+
 
 }
