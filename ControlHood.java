@@ -4,6 +4,11 @@ import java.util.Vector;
 public class ControlHood {
     Vector<Transaction> transactions;
 
+    ControlHood() {
+        transactions = new Vector<Transaction>();
+
+    }
+
     void setControlHood(Vector<Transaction> t) { this.transactions = t; }
     Vector<Transaction> getControlHood() { return this.transactions; }
 
@@ -24,15 +29,19 @@ public class ControlHood {
         return ballance;
     }
 
-    void printControlHood() {
+    void printCH() {
+
+        System.out.printf("|  Control Hood:");
        for (Transaction t : transactions) {
             System.out.println("-----------------------");
             System.out.printf("Payer: %s\n", t.getPayer());
             System.out.printf("Payee: %s\n", t.getPayee());
             System.out.printf("Amount: %s\n", t.getAmount());
             System.out.printf("Time: %s\n", t.getDate());
-        } 
-        System.out.println("-----------------------");
+        }
 
+        if (transactions.size() > 0) {
+            System.out.println("-----------------------");
+        } else System.out.println(" empty.");
     }
 }

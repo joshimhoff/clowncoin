@@ -8,31 +8,35 @@ import java.util.InputMismatchException;
 
 public class Client {
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("| Welcome to your ClownCoin Wallet |");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("");
         
-        String marketIP;
+        String marketIP, thisIP;
+
+        boolean debug = true;
 
         Console console = System.console();
         Scanner in = new Scanner(System.in);
 
-        if (args.length < 1) {
-            System.out.println("Please enter IP address of Marketpalce: ");
-            marketIP = in.nextLine();
-        } else {
-            marketIP = args[0];
-        }
+        System.out.println("Please enter IP address of Marketpalce: ");
+        marketIP = "216.195.191.252";//in.nextLine();
+       
 
-        System.out.println("Registering new user...");
+        System.out.println("Registering new user...\n Please enter your IP:");
+        thisIP = "216.195.191.252";//in.nextLine();
 
-        PaymentEngine pe = new PaymentEngine(marketIP);
+
+        PaymentEngine pe = new PaymentEngine(marketIP, thisIP);
 
         while (true) {
-            System.out.println("Press 1 for your account balance.");
+            System.out.println("\nPress 1 for your account balance.");
             System.out.println("Press 2 to make a payment.");
+            if (debug) System.out.println("Press 3 to view Account Info.");
+            if (debug) System.out.println("Press 4 to view Marketplace (IPs).");
+            if (debug) System.out.println("Press 5 to view Control Hood");
 
             // Parse request
             try {
@@ -40,8 +44,7 @@ public class Client {
                 System.out.println("");
                 if (selection == 1) {
                     System.out.printf("Account balance is %f ClownCoins\n", pe.checkBalance());
-                }
-                if (selection == 2) {
+                } else if (selection == 2) {
                     System.out.println("What IP would you like to send to?");
                     
                     // TODO: display registry?
@@ -54,7 +57,14 @@ public class Client {
                     System.out.printf("Sending %f ClownCoins to %s...\n", amount, payee);
 
                     pe.makePayment(payee, amount);
+                } else if (selection == 3 && debug) {
+                    pe.printAccountInfo();
+                } else if (selection == 4 && debug) {
+                    pe.printMarketplace();
+                } else if (selection == 5 && debug) {
+                    pe.printControlHood();
                 }
+
             } catch (InputMismatchException e) {
                 System.out.println("Command not parsed correctly.");
             }
