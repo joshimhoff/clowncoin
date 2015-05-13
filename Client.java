@@ -14,14 +14,23 @@ public class Client {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("");
         
+        String marketIP;
+
+        Console console = System.console();
+        Scanner in = new Scanner(System.in);
+
+        if (args.length < 1) {
+            System.out.println("Please enter IP address of Marketpalce: ");
+            marketIP = in.nextLine();
+        } else {
+            marketIP = args[0];
+        }
+
         System.out.println("Registering new user...");
 
-        PaymentEngine pe = new PaymentEngine(args[1]);
+        PaymentEngine pe = new PaymentEngine(marketIP);
 
         while (true) {
-            Console console = System.console();
-            Scanner in = new Scanner(System.in);
-
             System.out.println("Press 1 for your account balance.");
             System.out.println("Press 2 to make a payment.");
 

@@ -32,7 +32,7 @@ public class PaymentEngine implements PaymentEngineInterface {
                 account.setID(marketplace.register(InetAddress.getLocalHost().getHostAddress(), account.getPublicKey()));
                 
                 // Recieve ten ClownCoin from the system as a Welcome Present
-
+                welcomePresent();
             }
         } catch (Exception e) {
             System.err.println("Exception during PaymentEngine binding:");
