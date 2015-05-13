@@ -34,7 +34,7 @@ public class Client {
         while (true) {
             System.out.println("\nPress 1 for your account balance.");
             System.out.println("Press 2 to make a payment.");
-            if (debug) System.out.println("Press 3 to view Account Info.");
+            System.out.println("Press 3 to view yout account info.");
             if (debug) System.out.println("Press 4 to view Marketplace (IPs).");
             if (debug) System.out.println("Press 5 to view Control Hood");
 
@@ -45,7 +45,7 @@ public class Client {
                 if (selection == 1) {
                     System.out.printf("Account balance is %f ClownCoins\n", pe.checkBalance());
                 } else if (selection == 2) {
-                    System.out.println("What IP would you like to send to?");
+                    System.out.println("What acountID would you like to send to?");
                     
                     // TODO: display registry?
                     String payee = console.readLine();
@@ -57,7 +57,7 @@ public class Client {
                     System.out.printf("Sending %f ClownCoins to %s...\n", amount, payee);
 
                     pe.makePayment(payee, amount);
-                } else if (selection == 3 && debug) {
+                } else if (selection == 3) {
                     pe.printAccountInfo();
                 } else if (selection == 4 && debug) {
                     pe.printMarketplace();

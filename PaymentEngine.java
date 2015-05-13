@@ -37,7 +37,7 @@ public class PaymentEngine implements PaymentEngineInterface {
                 account.setID(marketplace.register(thisIP, account.getPublicKey()));
                 
                 // Recieve ten ClownCoin from the system as a Welcome Present
-                welcomePresent();
+            //    welcomePresent();
             }
             bindToRegistry();
         } catch (Exception e) {
@@ -67,6 +67,8 @@ public class PaymentEngine implements PaymentEngineInterface {
         } catch (RemoteException e) {
             System.err.println("RemoteException broadcasting transaction.");
         }
+
+        welcomePresent();
     }
 
     public void printControlHood(){
@@ -121,8 +123,8 @@ public class PaymentEngine implements PaymentEngineInterface {
             // Ask network to verify payment
             Registry registry;
             PaymentEngineInterface engine;
-            for (String ip : marketplace.getNodes()) {
-                System.out.printf("to ip %s\n", ip);
+            for (String ip : marketplace.getIPs().values()) {
+                if (debug) System.out.printf("Broadcasting Transaction to ip %s\n", ip);
                 registry = LocateRegistry.getRegistry(ip);
                 engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
                 engine.verifyTransaction(transaction, signedTransaction);
@@ -136,15 +138,22 @@ public class PaymentEngine implements PaymentEngineInterface {
 
     public int verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
         if (debug) System.out.println("~ Processing transaction verification ~");
+        if (debug) System.out.printf ("~              Payer: %s              \n", t.getPayer());
+        if (debug) System.out.printf ("~              Payee: %s              \n", t.getPayee());
+        if (debug) System.out.printf ("~             Amount: %f              \n", t.getAmount());
+        if (debug) System.out.println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
 
         boolean verifies = false;
 
         try {
-            if (t.getPayer() != "0") {
+            if (!t.getPayer().equals("0")) {
                 Signature dsa = Signature.getInstance("SHA1withDSA");
                 dsa.initVerify(marketplace.getKey(t.getPayer()));
                 dsa.update(t.toBytes());
                 verifies = dsa.verify(signedTransaction);
+            } else {
+                if (debug) System.out.println("Verifying transaction from root");
+                verifies = true;
             }
         } catch (NoSuchAlgorithmException e) {
             System.err.println("NoSuchAlgorithmException.");
@@ -153,6 +162,12 @@ public class PaymentEngine implements PaymentEngineInterface {
             System.err.println("InvalidKeyException.");
         } catch (SignatureException e) {
             System.err.println("SignatureException.");
+        }
+
+        for (Transaction existingT : controlHood.getControlHood()) {
+            if (existingT.equals(t)) {
+                verifies = false;
+            }
         }
 
         if (verifies) {
@@ -166,12 +181,13 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void broadcastNewControlHood(Transaction newTransaction) {
+        if (debug) System.out.println("Broadcasting new control hood to all");
         Vector<Transaction> newControlHood = controlHood.getControlHood();
         newControlHood.add(newTransaction);
         try {
             Registry registry;
             PaymentEngineInterface engine;
-            for (String ip : marketplace.getNodes()) {
+            for (String ip : marketplace.getIPs().values()) {
                 registry = LocateRegistry.getRegistry(ip);
                 engine = (PaymentEngineInterface) registry.lookup("PaymentEngine");
                 engine.receiveControlHood(newControlHood);
@@ -218,9 +234,9 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void receivePaymentNotification(Transaction t) throws RemoteException {
-        if (t.getPayer() == account.getID()) {
-            System.out.printf("Your payment of %f CC to %s has been verified.\n", t.getAmount(), t.getPayee());
-        } else if (t.getPayee() == account.getID()){
+        if (t.getPayer().equals(account.getID())) {
+            System.out.printf("Your payment of %f CC to id %s has been verified.\n", t.getAmount(), t.getPayee());
+        } else if (t.getPayee().equals(account.getID())){
             System.out.printf("You have received a verified payment of %f CC from %s.\n", t.getAmount(), t.getPayer());
         } else {
             //TODO Handle?

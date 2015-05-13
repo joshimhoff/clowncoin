@@ -35,7 +35,7 @@ public class Marketplace implements MarketplaceInterface {
 
     public String register(String ip, PublicKey key) throws RemoteException {
         // Generate userID
-        String newID = Integer.toString(keys.size());
+        String newID = Integer.toString(keys.size()+ 1); 
 
         // Add public key and IP to maps        
         keys.put(newID, key);
@@ -47,10 +47,10 @@ public class Marketplace implements MarketplaceInterface {
 
     
 
-    public Set<String> getNodes() throws RemoteException {
-        return ips.keySet();
+    // public Set<String> getNodes() throws RemoteException {
+    //     return ips.keySet();
 
-    }    
+    // }    
 
     public PublicKey getKey(String userId) throws RemoteException {
         return keys.get(userId);

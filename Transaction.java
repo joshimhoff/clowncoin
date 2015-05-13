@@ -34,6 +34,17 @@ public class Transaction implements java.io.Serializable {
         return dF.format(this.date);
     }
 
+    public boolean equals(Transaction t) {
+        if (this.amount == t.amount &&
+            this.payer == t.payer &&
+            this.payee == t.payee &&
+            this.date == t.date) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public byte[] toBytes() {
         ByteArrayOutputStream out = null;
 

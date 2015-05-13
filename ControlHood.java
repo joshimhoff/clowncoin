@@ -6,7 +6,6 @@ public class ControlHood {
 
     ControlHood() {
         transactions = new Vector<Transaction>();
-
     }
 
     void setControlHood(Vector<Transaction> t) { this.transactions = t; }
@@ -19,10 +18,10 @@ public class ControlHood {
     double getBallance(String userID) {
         double ballance = 0;
         for (Transaction t : transactions) {
-            if (t.getPayee() == userID) {
+            if (t.getPayee().equals(userID)) {
                 ballance += t.getAmount();
             }
-            if (t.getPayer() == userID) {
+            if (t.getPayer().equals(userID)) {
                 ballance -= t.getAmount();
             }
         }
@@ -30,9 +29,8 @@ public class ControlHood {
     }
 
     void printCH() {
-
         System.out.printf("|  Control Hood:");
-       for (Transaction t : transactions) {
+        for (Transaction t : transactions) {
             System.out.println("-----------------------");
             System.out.printf("Payer: %s\n", t.getPayer());
             System.out.printf("Payee: %s\n", t.getPayee());
