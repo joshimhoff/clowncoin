@@ -22,11 +22,11 @@ public class Client {
         Scanner in = new Scanner(System.in);
 
         System.out.println("Please enter IP address of Marketpalce: ");
-        marketIP = "216.195.191.252";//in.nextLine();
+        marketIP = "139.140.192.154";//in.nextLine();
        
 
         System.out.println("Registering new user...\n Please enter your IP:");
-        thisIP = "216.195.191.252";//in.nextLine();
+        thisIP = "139.140.192.154";//in.nextLine();
 
 
         PaymentEngine pe = new PaymentEngine(marketIP, thisIP);
