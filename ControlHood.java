@@ -15,7 +15,7 @@ public class ControlHood {
 
     int size() { return transactions.size(); }
 
-    double getBallance(String userID) {
+    double getBalance(String userID) {
         double ballance = 0;
         for (Transaction t : transactions) {
             if (t.getPayee().equals(userID)) {
