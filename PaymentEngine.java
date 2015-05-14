@@ -200,7 +200,11 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void receiveControlHood(Vector<Transaction> newControlHood) throws RemoteException {
-        if (newControlHood.size() > controlHood.size()) {
+        int lastElemIndex = newControlHood.size() - 1;
+        boolean repeat = ((lastElemIndex > 0) && 
+                          (newControlHood.get(lastElemIndex).equals(newControlHood.get(lastElemIndex-1))));
+        if (repeat) System.out.println("Repeat in new control hood!");
+        if (!repeat && newControlHood.size() > controlHood.size()) {
             controlHood.setControlHood(newControlHood);
         }
     }
