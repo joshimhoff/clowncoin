@@ -67,9 +67,6 @@ public class Verifier implements Runnable {
                 dsa.initVerify(k);
                 dsa.update(t.toBytes());
                 verifies = dsa.verify(st);
-            } else {
-                if (debug) System.out.println("Verifying transaction from root");
-                verifies = true;
             }
         } catch (Exception e) {
             System.err.println("Exception in Verifier verify.");
@@ -100,8 +97,15 @@ public class Verifier implements Runnable {
             verifies = false;
         }
 
+        // Accept all transactions from "root" user
+        if (t.getPayer().equals("0")) {
+            if (debug) System.out.println("Verifying transaction from root.");
+            verifies = true;
+        }
+
         if (verifies) {
             // Simulate the proof of work puzzle via random numbers and Thread.sleep
+            if (debug) System.out.println("Starting proof of work puzzle.");
             double waitTime = Math.random() * 25 + 5;
             try {
                 Thread.sleep((int)waitTime*1000);
