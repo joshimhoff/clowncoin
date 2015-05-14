@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.LinkedList;
 
 public class Verifier implements Runnable {
-    PaymentEngine engine;
-    LinkedList<Transaction> transactions;
-    LinkedList<byte[]> signedTransactions;
-    LinkedList<PublicKey> keys;
+    volatile PaymentEngine engine;
+    volatile LinkedList<Transaction> transactions;
+    volatile LinkedList<byte[]> signedTransactions;
+    volatile LinkedList<PublicKey> keys;
 
     public boolean debug = true;
 
@@ -19,7 +19,7 @@ public class Verifier implements Runnable {
         keys = new LinkedList<PublicKey>();
     }
 
-    public synchronized void update(Transaction t, byte[] st, PublicKey k) {
+    public void update(Transaction t, byte[] st, PublicKey k) {
         transactions.add(t);
         signedTransactions.add(st);
         keys.add(k);
