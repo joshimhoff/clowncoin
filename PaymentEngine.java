@@ -24,6 +24,9 @@ public class PaymentEngine implements PaymentEngineInterface {
         controlHood = new ControlHood();
         verifier = new Verifier(this);
 
+        Thread thread = new Thread(verifier);
+        thread.start();
+
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
