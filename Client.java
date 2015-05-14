@@ -6,6 +6,7 @@ import java.io.Console;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
+// Client handles UI.
 public class Client {
 
     public static void main(String[] args) {

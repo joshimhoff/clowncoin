@@ -12,7 +12,7 @@ import java.util.Vector;
 // development.
 public class PaymentEngine implements PaymentEngineInterface {
     private Account account;
-    public ControlHood controlHood; // TODO update
+    public ControlHood controlHood; // TODO break in encapsulation
     private MarketplaceInterface marketplace;
     private Verifier verifier;
 
@@ -208,10 +208,11 @@ public class PaymentEngine implements PaymentEngineInterface {
 
     /* 
      * SECTION III
-     * CALLS MADE BY VERIFIER AND HELPER METHODS
+     * CALLS MADE BY VERIFIER
      */
     
-    /
+    // Broadcast new transaction to all nodes in network
+    // @param newTransaction, to be broadcasted
     public void broadcastNewControlHood(Transaction newTransaction) {
         if (debug) System.out.println("Broadcasting new control hood to all.");
 
@@ -234,7 +235,8 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
     }
 
-    // TODO eliminate
+    // Return balance of some user according to the controlHood
+    // @param id, the user ID
     public double checkBalance(String id) {
         return controlHood.getBalance(id);
     }

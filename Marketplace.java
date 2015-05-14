@@ -10,11 +10,14 @@ import java.util.Vector;
 import java.util.Arrays;
 import java.util.Set;
 
-// MarketPlace Class
+// The centralized marketplace. Has two major purposes.
+// 1. Acts as a key server for the public key crytography.
+// 2. Assigns user IDs and keeps track of users on ClownCoin network.
 public class Marketplace implements MarketplaceInterface {
-    private Map<String, PublicKey> keys;        // UserIDs to public keys
-    private Map<String, String> ips;            // UserIDs tp IP addresses
+    private Map<String, PublicKey> keys;        // userIDs to public keys
+    private Map<String, String> ips;            // userIDs to IP addresses
 
+    // Constructor
     public Marketplace() {
         keys = new HashMap<String, PublicKey>(); 
         ips = new HashMap<String, String>();
@@ -28,11 +31,15 @@ public class Marketplace implements MarketplaceInterface {
             registry.rebind("Marketplace", stub);
             System.out.println("Marketplace bound.");
         } catch (Exception e) {
-            System.err.println("Exception during MarketPlace binding:");
+            System.err.println("Exception in MarketPlace binding.");
             e.printStackTrace();
         }
     }
 
+    // Register a new node on network
+    // @param ip, the IP address of new node
+    // @param key, the public key of new node
+    // @returns the assigned user ID
     public String register(String ip, PublicKey key) throws RemoteException {
         // Generate userID
         String newID = Integer.toString(keys.size()+ 1); 
@@ -45,23 +52,23 @@ public class Marketplace implements MarketplaceInterface {
         return newID;
     }
 
-    
-
-    // public Set<String> getNodes() throws RemoteException {
-    //     return ips.keySet();
-
-    // }    
-
+    // Get public key of some user
+    // @param userId, the ID of the user
     public PublicKey getKey(String userId) throws RemoteException {
         return keys.get(userId);
     }
 
-    public Map<String, String> getIPs() throws RemoteException {
-        return ips;
-    }
-
+    // Get IP of some user
+    // @param userId, the ID of the user
+    // @note only used for testing purposes, not a necessary function for a
+    //       working ClownCoin network
     public String getIP(String userId) throws RemoteException {
         return ips.get(userId);
+    }
+
+    // Get IPs of all nodes on the network
+    public Map<String, String> getIPs() throws RemoteException {
+        return ips;
     }
 
     public static void main(String args[]) {

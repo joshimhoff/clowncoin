@@ -1,33 +1,47 @@
 import java.util.Vector;
 
-// ControlHood Class
+// The controlHood stores the entire history of legitimate (verified) transactions
+// ever made on the network. It stores the history as a Vector of transactions.
+// The controlHoods of all nodes in the network should converge even if multiple
+// versions of it exist on the network at certain points.
+// NOTE corresponds to the public ledger in Bitcoin (control hood is a funnier name...)
 public class ControlHood {
     Vector<Transaction> transactions;
 
+    // Constructor
     ControlHood() {
         transactions = new Vector<Transaction>();
     }
 
+    // Getter and setter for data
+    // TODO break in encapsulation, update accordingly
     void setControlHood(Vector<Transaction> t) { this.transactions = t; }
     Vector<Transaction> getControlHood() { return this.transactions; }
 
+    // Add transaction to the hood
+    // @param t, verified transaction to be added
     void addTransaction(Transaction t) { this.transactions.add(t); }
 
+    // Get size of transaction
     int size() { return transactions.size(); }
 
+    // Get balance of some user
+    // @param userID, id of user account being queried
+    // @note balance is derived data of control hood
     double getBalance(String userID) {
-        double ballance = 0;
+        double balance = 0;
         for (Transaction t : transactions) {
             if (t.getPayee().equals(userID)) {
-                ballance += t.getAmount();
+                balance += t.getAmount();
             }
             if (t.getPayer().equals(userID)) {
-                ballance -= t.getAmount();
+                balance -= t.getAmount();
             }
         }
-        return ballance;
+        return balance;
     }
 
+    // Print da hood, yo
     void printCH() {
         System.out.printf("|  Control Hood:");
         for (Transaction t : transactions) {
