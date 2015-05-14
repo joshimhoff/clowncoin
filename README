@@ -1,0 +1,18 @@
+ClownCoin is a toy cryptocurrency inspired by Bitcoin.
+@authors Josh Imhoff and Evan Hoyt
+
+USAGE
+To run registry,
+# make reg
+
+To build all java code,
+# make coin
+
+To run marketplace,
+# java -Djava.security.policy=ClownCoin.policy -Djava.rmi.server.hostname=[IP OF MARKETPLACE] Marketplace
+
+To run client,
+# java -Djava.security.policy=ClownCoin.policy -Djava.rmi.server.hostname=[IP OF CLIENT] Client [IP OF MARKETPLACE] [IP OF CLIENT]
+
+To run tester,
+# java -Djava.security.policy=ClownCoin.policy -Djava.rmi.server.hostname=[IP OF CLIENT] Tester [IP OF MARKETPLACE] [IP OF CLIENT]
