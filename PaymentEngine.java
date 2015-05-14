@@ -11,8 +11,9 @@ import java.util.Vector;
 // Payment Class
 public class PaymentEngine implements PaymentEngineInterface {
     private Account account;
-    private ControlHood controlHood;
+    public ControlHood controlHood; // TODO update
     private MarketplaceInterface marketplace;
+    private Verifier verifier;
 
     public boolean debug = true;
 
@@ -21,6 +22,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         // In the future, this would load a persistent account from memory or web
         account = new Account();
         controlHood = new ControlHood();
+        verifier = new Verifier(this);
 
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
@@ -136,61 +138,7 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
-        if (debug) System.out.println("~ Processing transaction verification ~");
-        if (debug) System.out.printf ("~              Payer: %s              \n", t.getPayer());
-        if (debug) System.out.printf ("~              Payee: %s              \n", t.getPayee());
-        if (debug) System.out.printf ("~             Amount: %f              \n", t.getAmount());
-        if (debug) System.out.println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
-
-        boolean verifies = false;
-
-        // Simulate the proof of work puzzle via random numbers and Thread.sleep
-        double waitTime = Math.random() * 25 + 5;
-        try {
-            Thread.sleep((int)waitTime*1000);
-        } catch (InterruptedException e) {
-            System.err.println("InterruptedException.");
-        }
-
-        try {
-            if (!t.getPayer().equals("0")) {
-                Signature dsa = Signature.getInstance("SHA1withDSA");
-                dsa.initVerify(marketplace.getKey(t.getPayer()));
-                dsa.update(t.toBytes());
-                verifies = dsa.verify(signedTransaction);
-                if (checkBalance(t.getPayer()) < t.getAmount()) {
-                    verifies = false;
-                }
-            } else {
-                if (debug) System.out.println("Verifying transaction from root");
-                verifies = true;
-            }
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("NoSuchAlgorithmException.");
-        } catch (InvalidKeyException e) {
-            System.out.println("TEST");
-            System.err.println("InvalidKeyException.");
-        } catch (SignatureException e) {
-            System.err.println("SignatureException.");
-        }
-
-        for (Transaction existingT : controlHood.getControlHood()) {
-            if (existingT.equals(t)) {
-                verifies = false;
-            }
-        }
-
-        // If some user attempts to pay himself
-        if (t.getPayer() == t.getPayee()) {
-            verifies = false;
-        }
-
-        if (verifies) {
-            System.out.printf("Verified payment of %f CC at %s from %s to %s. Broadcasting updated hood.\n",
-                              t.getAmount(), t.getDateString(), t.getPayer(), t.getPayee());
-            notifyPayerAndPayeeOfVerification(t);
-            broadcastNewControlHood(t);
-        }
+        verifier.update(t, signedTransaction, marketplace.getKey(t.getPayer()));
     }
 
     public void broadcastNewControlHood(Transaction newTransaction) {
