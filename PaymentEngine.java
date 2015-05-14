@@ -47,10 +47,10 @@ public class PaymentEngine implements PaymentEngineInterface {
 
     }
 
-    private void welcomePresent() {
-        Transaction t = new Transaction(10, "0", account.getID());
-        broadcastTransactionToBeVerified(t, null);
-
+    public void freeMoney() {
+            Transaction t = new Transaction(10, "0", account.getID());
+            broadcastTransactionToBeVerified(t, null);
+   
     }
 
     public void printMarketplace() {
@@ -68,7 +68,6 @@ public class PaymentEngine implements PaymentEngineInterface {
             System.err.println("RemoteException broadcasting transaction.");
         }
 
-        welcomePresent();
     }
 
     public void printControlHood(){
@@ -159,6 +158,9 @@ public class PaymentEngine implements PaymentEngineInterface {
                 dsa.initVerify(marketplace.getKey(t.getPayer()));
                 dsa.update(t.toBytes());
                 verifies = dsa.verify(signedTransaction);
+                if (checkBalance(t.getPayer()) < t.getAmount()) {
+                    verifies = false;
+                }
             } else {
                 if (debug) System.out.println("Verifying transaction from root");
                 verifies = true;
@@ -223,7 +225,11 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public double checkBalance() {
-        return controlHood.getBallance(account.getID());
+        return controlHood.getBalance(account.getID());
+    }
+
+    public double checkBalance(String id) {
+        return controlHood.getBalance(id);
     }
 
     private void notifyPayerAndPayeeOfVerification(Transaction t) {

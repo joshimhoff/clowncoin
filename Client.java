@@ -32,11 +32,12 @@ public class Client {
         PaymentEngine pe = new PaymentEngine(marketIP, thisIP);
 
         while (true) {
-            System.out.println("\nPress 1 for your account balance.");
-            System.out.println("Press 2 to make a payment.");
-            System.out.println("Press 3 to view yout account info.");
-            if (debug) System.out.println("Press 4 to view Marketplace (IPs).");
-            if (debug) System.out.println("Press 5 to view Control Hood");
+            System.out.println("\nEnter 1 for your account balance.");
+            System.out.println("Enter 2 to make a payment.");
+            System.out.println("Enter 3 to view yout account info.");
+            if (debug) System.out.println("Enter 4 to view Marketplace (IPs).");
+            if (debug) System.out.println("Enter 5 to view Control Hood");
+            if (debug) System.out.println("Enter 6 for FREE MONEY! (10cc)");
 
             // Parse request
             try {
@@ -63,6 +64,8 @@ public class Client {
                     pe.printMarketplace();
                 } else if (selection == 5 && debug) {
                     pe.printControlHood();
+                } else if (selection == 6 && debug) {
+                    pe.freeMoney();
                 }
 
             } catch (InputMismatchException e) {
