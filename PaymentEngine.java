@@ -145,6 +145,14 @@ public class PaymentEngine implements PaymentEngineInterface {
 
         boolean verifies = false;
 
+        // Simulate the proof of work puzzle via random numbers and Thread.sleep
+        double waitTime = Math.random() * 25 + 5;
+        try {
+            Thread.sleep((int)waitTime*1000);
+        } catch (InterruptedException e) {
+            System.err.println("InterruptedException.");
+        }
+
         try {
             if (!t.getPayer().equals("0")) {
                 Signature dsa = Signature.getInstance("SHA1withDSA");
@@ -200,7 +208,11 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void receiveControlHood(Vector<Transaction> newControlHood) throws RemoteException {
-        if (newControlHood.size() > controlHood.size()) {
+        int lastElemIndex = newControlHood.size() - 1;
+        boolean repeat = ((lastElemIndex > 0) && 
+                          (newControlHood.get(lastElemIndex).equals(newControlHood.get(lastElemIndex-1))));
+        if (repeat) System.out.println("Repeat in new control hood!");
+        if (!repeat && newControlHood.size() > controlHood.size()) {
             controlHood.setControlHood(newControlHood);
         }
     }
