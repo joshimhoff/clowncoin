@@ -38,7 +38,7 @@ public class Transaction implements java.io.Serializable {
         if (this.amount == t.amount &&
             this.payer.equals(t.payer) &&
             this.payee.equals(t.payee) &&
-            this.date.compareTo(t.date) == 0 {
+            (this.date.compareTo(t.date) == 0)) {
             return true;
         } else {
             return false;
