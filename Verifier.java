@@ -20,14 +20,18 @@ public class Verifier implements Runnable {
     }
 
     public void update(Transaction t, byte[] st, PublicKey k) {
+        System.out.println("Updating queues in verifier");
         transactions.add(t);
         signedTransactions.add(st);
         keys.add(k);
     }
 
     public void run() {
+        System.out.println("Starts verifier");
         while (true) {
+            System.out.println("Looping");
             if (transactions.size() > 0) {
+                System.out.println("GOING TO VERIFY");
                 verify(transactions.removeFirst(), 
                        signedTransactions.removeFirst(), 
                        keys.removeFirst());
