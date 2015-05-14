@@ -96,7 +96,7 @@ public class Verifier implements Runnable {
         }
 
         // Reject transaction if amount is zero or negative
-        if (t.getAmount() <= 0)
+        if (t.getAmount() <= 0) {
             verifies = false;
         }
 
