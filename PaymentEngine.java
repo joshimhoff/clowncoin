@@ -141,7 +141,6 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     public void verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
-        System.out.println("Adding to queues in PaymentEngine!");
         verifier.update(t, signedTransaction, marketplace.getKey(t.getPayer()));
     }
 

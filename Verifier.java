@@ -19,19 +19,15 @@ public class Verifier implements Runnable {
         keys = new LinkedList<PublicKey>();
     }
 
-    public void update(Transaction t, byte[] st, PublicKey k) {
-        System.out.println("Updating queues in verifier");
+    public synchronized void update(Transaction t, byte[] st, PublicKey k) {
         transactions.add(t);
         signedTransactions.add(st);
         keys.add(k);
     }
 
     public void run() {
-        System.out.println("Starts verifier");
         while (true) {
-            System.out.println("Looping");
             if (transactions.size() > 0) {
-                System.out.println("GOING TO VERIFY");
                 verify(transactions.removeFirst(), 
                        signedTransactions.removeFirst(), 
                        keys.removeFirst());
@@ -85,7 +81,7 @@ public class Verifier implements Runnable {
         }
 
         // If some user attempts to pay himself
-        if (t.getPayer() == t.getPayee()) {
+        if (t.getPayer().equals(t.getPayee())) {
             verifies = false;
         }
 
