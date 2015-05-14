@@ -178,6 +178,11 @@ public class PaymentEngine implements PaymentEngineInterface {
             }
         }
 
+        // If some user attempts to pay himself
+        if (t.getPayer() == t.getPayee()) {
+            verifies = false;
+        }
+
         if (verifies) {
             System.out.printf("Verified payment of %f CC at %s from %s to %s. Broadcasting updated hood.\n",
                               t.getAmount(), t.getDateString(), t.getPayer(), t.getPayee());
