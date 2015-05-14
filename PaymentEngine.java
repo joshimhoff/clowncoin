@@ -145,6 +145,14 @@ public class PaymentEngine implements PaymentEngineInterface {
 
         boolean verifies = false;
 
+        // Simulate the proof of work puzzle via random numbers and Thread.sleep
+        double waitTime = Math.random() * 25 + 5;
+        try {
+            Thread.sleep((int)waitTime*1000);
+        } catch (InterruptedException e) {
+            System.err.println("InterruptedException.");
+        }
+
         try {
             if (!t.getPayer().equals("0")) {
                 Signature dsa = Signature.getInstance("SHA1withDSA");
