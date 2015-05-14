@@ -21,13 +21,10 @@ public class Client {
         Console console = System.console();
         Scanner in = new Scanner(System.in);
 
-        System.out.println("Please enter IP address of Marketpalce: ");
-        marketIP = "139.140.192.154";//in.nextLine();
-       
-
-        System.out.println("Registering new user...\n Please enter your IP:");
-        thisIP = "139.140.192.154";//in.nextLine();
-
+        if (args.length != 2)
+            System.out.println("USAGE ipOfMarketplace ipOfThisMachine");
+        marketIP = args[0];
+        thisIP = args[1];
 
         PaymentEngine pe = new PaymentEngine(marketIP, thisIP);
 
