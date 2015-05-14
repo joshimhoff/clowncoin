@@ -135,7 +135,7 @@ public class PaymentEngine implements PaymentEngineInterface {
         }
     }
 
-    public int verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
+    public void verifyTransaction(Transaction t, byte[] signedTransaction) throws RemoteException {
         if (debug) System.out.println("~ Processing transaction verification ~");
         if (debug) System.out.printf ("~              Payer: %s              \n", t.getPayer());
         if (debug) System.out.printf ("~              Payee: %s              \n", t.getPayee());
@@ -190,9 +190,7 @@ public class PaymentEngine implements PaymentEngineInterface {
                               t.getAmount(), t.getDateString(), t.getPayer(), t.getPayee());
             notifyPayerAndPayeeOfVerification(t);
             broadcastNewControlHood(t);
-            return 1;
-        }                       // TODO: Handle failed verification
-        return 0;
+        }
     }
 
     public void broadcastNewControlHood(Transaction newTransaction) {
