@@ -6,11 +6,11 @@ reg:
 
 market: Marketplace.java MarketplaceInterface.java
 	javac *.java
-	java -Djava.security.policy=ClownCoin.policy Marketplace
+	java -Djava.security.policy=ClownCoin.policy -Djava.rmi.server.hostname=139.140.192.154 Marketplace
 
 client: Client.java PaymentEngine.java PaymentEngineInterface.java
 	javac *.java
-	java -Djava.security.policy=ClownCoin.policy Client
+	java -Djava.security.policy=ClownCoin.policy -Djava.rmi.server.hostname=139.140.192.154 Client
 
 clean:
 	rm *.class
