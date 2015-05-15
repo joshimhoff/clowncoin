@@ -208,7 +208,7 @@ public class PaymentEngine implements PaymentEngineInterface {
     }
 
     /* 
-     * SECTION III
+     * SECTION IV
      * CALLS MADE BY VERIFIER
      */
     

@@ -106,7 +106,7 @@ public class Verifier implements Runnable {
         if (verifies) {
             // Simulate the proof of work puzzle via random numbers and Thread.sleep
             if (debug) System.out.println("Starting proof of work puzzle.");
-            double waitTime = Math.random() * 25 + 5;
+            double waitTime = Math.random() * 5 + 5;
             try {
                 Thread.sleep((int)waitTime*1000);
             } catch (InterruptedException e) {
