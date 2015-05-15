@@ -30,7 +30,8 @@ public class ControlHood {
     // @note balance is derived data of control hood
     double getBalance(String userID) {
         double balance = 0;
-        for (Transaction t : transactions) {
+        for (int i = 0; i < transactions.size(); i++) {
+            Transaction t = transactions.get(i);
             if (t.getPayee().equals(userID)) {
                 balance += t.getAmount();
             }
