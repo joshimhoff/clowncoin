@@ -93,14 +93,19 @@ public class PaymentEngine implements PaymentEngineInterface {
     // @param newControlHood, new controlHood from some node in the network
     public void receiveControlHood(Vector<Transaction> newControlHood) throws RemoteException {
         // Makes two checks
-        // 1. Last two transactions should be unique
+        // 1. Last transaction should be new
         //     NOTE important because multiple nodes may approve transaction at same time
         //          leading to an invalid control hood
         // 2. Size of controlHood is bigger than last controlHood
         //     NOTE important for dealing with forks in ClownCoin network
         int lastElemIndex = newControlHood.size() - 1;
-        boolean repeat = ((lastElemIndex > 0) && 
-                          (newControlHood.get(lastElemIndex).equals(newControlHood.get(lastElemIndex-1))));
+        boolean repeat = false;
+        if (lastElemIndex > 0) {
+            for (int i = 0; i < lastElemIndex; i++) {
+                if (newControlHood.get(lastElemIndex).equals(newControlHood.get(i)))
+                    repeat = true;
+            }
+        }
         if (!repeat && newControlHood.size() > controlHood.size()) {
             controlHood.setControlHood(newControlHood);
         }
@@ -217,8 +222,8 @@ public class PaymentEngine implements PaymentEngineInterface {
     public void broadcastNewControlHood(Transaction newTransaction) {
         if (debug) System.out.println("Broadcasting new control hood to all.");
 
-        // Verification has succeeded, so add transaction to controlHood
-        Vector<Transaction> newControlHood = controlHood.getControlHood();
+        // Verification has succeeded, so add transaction to new controlHood to be broadcast
+        Vector<Transaction> newControlHood = new Vector<Transaction>(controlHood.getControlHood());
         newControlHood.add(newTransaction);
 
         // Broadcast to all via RMI calls
